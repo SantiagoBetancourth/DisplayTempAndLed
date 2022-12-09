@@ -1,0 +1,88 @@
+//Alex Santiago Betancourt 
+//Julian Camilo Carvajal
+//Fredy Junior Ortega
+
+#include <LiquidCrystal.h>
+#include "DHTStable.h"
+
+DHTStable DHT;
+
+#define DHT11_PIN 22
+const int redPin = 9; // R petal on RGB LED module connected to digital pin 11
+const int greenPin = 8; // G petal on RGB LED module connected to digital pin 9
+const int bluePin = 7;
+const int rs = 12, en = 11, d4 = 5, d5 = 4, d6 = 3, d7 = 2;
+LiquidCrystal lcd(rs, en, d4, d5, d6, d7);
+
+
+void setup()
+{
+  pinMode(redPin, OUTPUT); // sets the redPin to be an output
+  pinMode(greenPin, OUTPUT); // sets the greenPin to be an output
+  pinMode(bluePin, OUTPUT); 
+  Serial.begin(115200);
+  Serial.println(__FILE__);
+  Serial.print("LIBRARY VERSION: ");
+  Serial.println(DHTSTABLE_LIB_VERSION);
+  Serial.println();
+  Serial.println("Type,\tstatus,\tHumidity (%),\tTemperature (C)");
+
+    lcd.begin(16, 2);
+  // Print a message to the LCD.
+  
+}
+
+
+void loop()
+{
+  
+  // READ DATA
+  int chk = DHT.read11(DHT11_PIN);
+  switch (chk)
+  {
+    case DHTLIB_OK:  
+      lcd.setCursor(0, 0);
+      lcd.print("OK ");
+      break;
+    case DHTLIB_ERROR_CHECKSUM: 
+       lcd.setCursor(0, 0);
+       lcd.print("Checksum error "); 
+      break;
+    case DHTLIB_ERROR_TIMEOUT: 
+      lcd.setCursor(0, 0);
+       lcd.print("Time out error "); 
+      break;
+    default: 
+       lcd.setCursor(0, 0);
+       lcd.print("Unknown error "); 
+      break;
+  }
+  // DISPLAY DATA
+  if(DHT.getTemperature()>29){
+     Serial.print("LED_RED=ON ");
+    digitalWrite(greenPin,LOW);
+      digitalWrite(redPin,HIGH);
+      delay(1000);
+  }else if(DHT.getTemperature()<26){
+     Serial.print("LED_BLUE=ON ");
+     digitalWrite(redPin,LOW);
+        digitalWrite(bluePin,HIGH);
+        delay(1000);
+  }else if(DHT.getTemperature()<29 && DHT.getTemperature()>26){
+         Serial.print("LED_GREEN=ON ");
+        digitalWrite(bluePin,LOW);
+        digitalWrite(greenPin,HIGH);
+        delay(1000);
+  }
+  lcd.setCursor(0, 0);
+  lcd.print("Temp Humedad");
+  lcd.setCursor(0, 1);
+  lcd.print(DHT.getHumidity(), 1);
+  lcd.print(" ");
+  lcd.print(DHT.getTemperature(), 1);
+
+  delay(2000);
+   
+  // print the number of seconds since reset:
+ 
+}
